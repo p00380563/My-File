@@ -1,0 +1,55 @@
+"systemctl start mariadb
+systemctl stop mariadb"
+mysql_secure_installation
+mysqladmin -uroot -proot -h localhost ping
+mysqladmin -uroot -proot -h localhost status
+mysqladmin -uroot -proot -h localhost version
+"mysqladmin -uroot -proot -h localhost processlist
+
+备注：也可以通过查询表实现（与上面命令结果一样）
+mysql -uroot -proot information_schema -e ""select id,host,db,command,time,state,info from processlist;"" "
+"mysql -uroot -proot information_schema -e ""select DB,USER,(case when instr(host,':')>0 then substr(host,1,instr(host,':')-1) else host end) as HOST,count(*) from processlist group by DB,USER,(case when instr(host,':')>0 then substr(host,1,instr(host,':')-1) else host end);"" 
+
+备注：host的字段的格式为：10.137.49.98:57511 和localhost，所以统计的时候需要使用字符串函数处理；"
+mysql -uroot -proot -e 'select table_schema,round(sum(data_length+index_length)/1024/1024,4) size_mb from information_schema.tables group by table_schema;'
+select table_schema,table_name,round(sum(data_length+index_length)/1024/1024,4) size_mb from information_schema.tables group by table_schema,table_name order by size_mb desc;
+mysql -u <user> --password=<password> -e "SHOW COLUMNS FROM <table>" <database> | awk '{print $1}' | tr "\n" "," | sed 's/,$//g'
+mysql -u user-name -p password < script.sql 
+mysqldump -uroot -T/tmp/mysqldump test test_outfile --fields-enclosed-by=\" --fields-terminated-by=, 
+"mysqlimport --user=name --password=pwd test --fields-enclosed-by=\"" --fields-terminated-by=, /tmp/test_outfile.txt 
+LOAD DATA INFILE '/tmp/test_outfile.txt' INTO TABLE test_outfile FIELDS TERMINATED BY '""' ENCLOSED BY ','; "
+ps -ef | grep "mysqld" | grep -v "grep"
+mysql -uroot -proot -e 'show status'
+mysqlcheck -uroot -proot --all-databases
+mysql -uroot -proot -e 'SHOW /*!50000 GLOBAL */ STATUS LIKE "Questions"'
+mysql -uroot -proot -e 'SHOW /*!50000 GLOBAL */ STATUS LIKE "Queries"'
+mysql -uroot -proot -e 'SHOW /*!50000 GLOBAL */ STATUS LIKE "Key%"'
+mysql -uroot -proot -e 'SHOW /*!50000 GLOBAL */ STATUS LIKE "Innodb_buffer_pool_read%"'
+mysql -uroot -proot -e 'SHOW /*!50000 GLOBAL */ STATUS LIKE "Qcache%"'
+mysql -uroot -proot -e 'SHOW /*!50000 GLOBAL */ STATUS LIKE "Open%"'
+mysql -uroot -proot -e 'SHOW /*!50000 GLOBAL */ STATUS LIKE "Thread%"'
+mysql -uroot -proot -e 'SHOW /*!50000 GLOBAL */ STATUS LIKE "%lock%"'
+mysql -uroot -proot -e 'SHOW SLAVE STATUS'
+mysql -uroot -proot -e 'SHOW /*!50000 GLOBAL */ STATUS LIKE "Created_tmp%"'
+mysql -uroot -proot -e 'SHOW /*!50000 GLOBAL */ STATUS LIKE "Binlog_cache%"'
+mysql -uroot -proot -e 'SHOW /*!50000 GLOBAL */ STATUS LIKE "Innodb_log_waits"'
+mysql -uroot -proot -e 'show databases;'
+mysql -uroot -proot -e 'show variables like "max_connections";'
+"mysql -uroot -proot <<EOF >> log_record.txt 2>&1
+TEE output-mysql.txt;
+SHOW GLOBAL VARIABLES;
+SHOW GLOBAL STATUS;
+SHOW ENGINE INNODB STATUS\G
+SHOW FULL PROCESSLIST;
+SELECT SLEEP(30);
+SHOW GLOBAL STATUS;
+SHOW ENGINE INNODB STATUS\G
+SHOW FULL PROCESSLIST;
+SELECT SLEEP(30);
+SHOW GLOBAL STATUS;
+SHOW ENGINE INNODB STATUS\G
+SHOW FULL PROCESSLIST;
+NOTEE;
+EOF"
+mysql -uroot -proot -e 'select now() as systemtime;'
+mysql -uroot -proot -e 'select version() as mysql_version;'
